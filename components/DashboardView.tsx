@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useData } from "./DataProvider";
+import { OnboardingPanel } from "./OnboardingPanel";
 import { Avatar, Chip, priorityColor } from "./ui";
 import { dueLabel } from "./TasksView";
 import { PRIORITY, SEASONS, label } from "@/lib/constants";
@@ -22,6 +23,7 @@ function nextSeason() {
 
 export function DashboardView() {
   const { profile, tasks, contents, members } = useData();
+  const isEmpty = tasks.length === 0 && contents.length === 0;
   const today = todayISO();
   const todayTasks = tasks.filter((t) => t.due_date === today && !isDone(t));
   const overdue = tasks.filter((t) => t.due_date && daysFrom(t.due_date) < 0 && !isDone(t));
@@ -50,6 +52,7 @@ export function DashboardView() {
 
   return (
     <>
+      {isEmpty && <OnboardingPanel />}
       <div className="mb-5">
         <h1 className="text-2xl font-extrabold tracking-tight">{greet}, {profile.name?.split(" ")[0]}</h1>
         <div className="mt-0.5 text-sm capitalize" style={{ color: "var(--muted)" }}>{dateStr}</div>
