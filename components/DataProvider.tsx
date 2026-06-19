@@ -84,15 +84,16 @@ export function DataProvider({
   const company_id = profile.company_id;
 
   const reload = useCallback(async () => {
+    const cid = profile.company_id;
     const [m, p, t, l, c, ck, d, cm] = await Promise.all([
-      supabase.from("profiles").select("*").order("created_at"),
-      supabase.from("projects").select("*").order("created_at"),
-      supabase.from("tasks").select("*").order("created_at"),
-      supabase.from("editorial_lines").select("*").order("created_at"),
-      supabase.from("contents").select("*").order("publish_date"),
-      supabase.from("task_checklist_items").select("*").order("position"),
-      supabase.from("task_dependencies").select("*"),
-      supabase.from("comments").select("*").order("created_at"),
+      supabase.from("profiles").select("*").eq("company_id", cid).order("created_at"),
+      supabase.from("projects").select("*").eq("company_id", cid).order("created_at"),
+      supabase.from("tasks").select("*").eq("company_id", cid).order("created_at"),
+      supabase.from("editorial_lines").select("*").eq("company_id", cid).order("created_at"),
+      supabase.from("contents").select("*").eq("company_id", cid).order("publish_date"),
+      supabase.from("task_checklist_items").select("*").eq("company_id", cid).order("position"),
+      supabase.from("task_dependencies").select("*").eq("company_id", cid),
+      supabase.from("comments").select("*").eq("company_id", cid).order("created_at"),
     ]);
     if (m.data) setMembers(m.data as Profile[]);
     if (p.data) setProjects(p.data as Project[]);
@@ -105,7 +106,7 @@ export function DataProvider({
     const me = (m.data as Profile[] | null)?.find((x) => x.id === profile.id);
     if (me) setProfile(me);
     setLoading(false);
-  }, [supabase, profile.id]);
+  }, [supabase, profile.id, profile.company_id]);
 
   useEffect(() => {
     reload();

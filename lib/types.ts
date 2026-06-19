@@ -27,6 +27,16 @@ export type ContentStatus =
 
 export type Priority = "baixa" | "media" | "alta" | "urgente";
 
+export type CompanyStatus = "pending" | "active" | "suspended";
+
+export interface Company {
+  id: string;
+  name: string;
+  slug: string | null;
+  status: CompanyStatus;
+  created_at?: string;
+}
+
 export interface Profile {
   id: string;
   company_id: string;
@@ -34,6 +44,7 @@ export interface Profile {
   email: string | null;
   avatar_url: string | null;
   role: Role;
+  is_super_admin?: boolean;
   created_at?: string;
 }
 

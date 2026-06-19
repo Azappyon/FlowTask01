@@ -38,6 +38,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
     (t) => t.due_date && daysFrom(t.due_date) < 0 && !["concluido", "aprovado"].includes(t.status)
   ).length;
 
+  const navItems: [string, string, string][] = profile.is_super_admin
+    ? [...NAV, ["/admin", "Admin", "M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"]]
+    : NAV;
+
   function toggleTheme() {
     const root = document.documentElement;
     const dark = root.classList.toggle("dark");
@@ -60,7 +64,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <span className="text-lg font-extrabold">Flowtask</span>
         </div>
         <nav className="flex-1 space-y-0.5 px-3 py-2">
-          {NAV.map(([href, label, d]) => {
+          {navItems.map(([href, label, d]) => {
             const active = pathname === href;
             return (
               <Link
