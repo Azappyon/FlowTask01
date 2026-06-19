@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useData } from "./DataProvider";
-import { Avatar, Modal } from "./ui";
+import { Avatar } from "./ui";
 import { DemoBanner } from "./DemoBanner";
+import { CreateWizard } from "./CreateWizard";
 import { daysFrom } from "@/lib/format";
 
 const NAV: [string, string, string][] = [
@@ -45,12 +46,11 @@ function LoadingSkeleton() {
 const LOGOUT_D = "M16 17l5-5-5-5M21 12H9M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4";
 
 export function Shell({ children }: { children: React.ReactNode }) {
-  const { profile, tasks, loading, saveTask } = useData();
+  const { profile, tasks, loading } = useData();
   const pathname = usePathname();
   const [navOpen, setNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [quickOpen, setQuickOpen] = useState(false);
-  const [qtitle, setQtitle] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
     try { setCollapsed(localStorage.getItem("flowtask_sidebar") === "1"); } catch {}
@@ -76,12 +76,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
   function toggleTheme() {
     const dark = document.documentElement.classList.toggle("dark");
     try { localStorage.setItem("flowtask_theme", dark ? "dark" : "light"); } catch {}
-  }
-  async function quickCreate() {
-    if (!qtitle.trim()) return;
-    await saveTask({ title: qtitle.trim(), status: "a_fazer", priority: "media" });
-    setQtitle("");
-    setQuickOpen(false);
   }
 
   return (
@@ -155,9 +149,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </button>
           {current && <div className="text-sm font-semibold" style={{ color: "var(--ink)" }}>{current}</div>}
           <div className="flex-1" />
-          <button className="btn btn-primary px-3 py-1.5 text-sm" onClick={() => { setQtitle(""); setQuickOpen(true); }}>
+          <button className="btn btn-primary px-3 py-1.5 text-sm" onClick={() => setCreateOpen(true)}>
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-            <span className="hidden sm:inline">Nova tarefa</span>
+            <span className="hidden sm:inline">Criar</span>
           </button>
           <button className="btn btn-ghost px-2 py-1.5" onClick={toggleTheme} aria-label="Alternar tema" title="Alternar tema">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
@@ -170,21 +164,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      <Modal
-        open={quickOpen}
-        title="Nova tarefa"
-        onClose={() => setQuickOpen(false)}
-        footer={
-          <>
-            <button className="btn btn-ghost" onClick={() => setQuickOpen(false)}>Cancelar</button>
-            <button className="btn btn-primary" onClick={quickCreate}>Criar tarefa</button>
-          </>
-        }
-      >
-        <label className="field-label">Título</label>
-        <input autoFocus className="input" placeholder="O que precisa ser feito?" value={qtitle} onChange={(e) => setQtitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") quickCreate(); }} />
-        <p className="mt-2 text-xs" style={{ color: "var(--faint)" }}>Criada como “Para fazer”. Ajuste projeto, prazo e prioridade depois, em Tarefas.</p>
-      </Modal>
+      <CreateWizard open={createOpen} onClose={() => setCreateOpen(false)} />
     </div>
   );
 }
