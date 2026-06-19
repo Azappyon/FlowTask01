@@ -25,6 +25,8 @@ export function TasksView() {
   const [editing, setEditing] = useState<Task | null | undefined>(undefined); // undefined=closed
   const [openId, setOpenId] = useState<string | null>(null);
   const [filters, setFilters] = useState({ status: "", priority: "", project: "", assignee: "", sort: "prazo" });
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeCount = [filters.status, filters.priority, filters.project, filters.assignee].filter(Boolean).length;
 
   const blockingCount = (t: Task) =>
     deps
@@ -62,17 +64,29 @@ export function TasksView() {
         }
       />
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        <Sel value={filters.status} onChange={(v) => setFilters({ ...filters, status: v })} placeholder="Todos os status" options={TASK_STATUS} />
-        <Sel value={filters.priority} onChange={(v) => setFilters({ ...filters, priority: v })} placeholder="Toda prioridade" options={PRIORITY} />
-        <Sel value={filters.project} onChange={(v) => setFilters({ ...filters, project: v })} placeholder="Todos os projetos" options={projects.map((p) => [p.id, p.name])} />
-        <Sel value={filters.assignee} onChange={(v) => setFilters({ ...filters, assignee: v })} placeholder="Todos responsáveis" options={members.map((m) => [m.id, m.name || ""])} />
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <button className="btn btn-ghost px-3 py-1.5 text-sm" onClick={() => setFiltersOpen((o) => !o)} aria-expanded={filtersOpen}>
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
+          Filtros{activeCount ? ` · ${activeCount}` : ""}
+        </button>
         <select className="select w-auto" value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })}>
           <option value="prazo">Ordenar: prazo</option>
           <option value="prioridade">Ordenar: prioridade</option>
           <option value="titulo">Ordenar: título</option>
         </select>
+        {activeCount > 0 && (
+          <button className="btn btn-ghost px-3 py-1.5 text-sm" onClick={() => setFilters({ ...filters, status: "", priority: "", project: "", assignee: "" })}>Limpar</button>
+        )}
+        <span className="ml-auto text-xs" style={{ color: "var(--faint)" }}>{list.length} {list.length === 1 ? "tarefa" : "tarefas"}</span>
       </div>
+      {filtersOpen && (
+        <div className="ft-fade mb-4 flex flex-wrap gap-2 rounded-xl border p-3" style={{ borderColor: "var(--line)", background: "var(--surface)" }}>
+          <Sel value={filters.status} onChange={(v) => setFilters({ ...filters, status: v })} placeholder="Todos os status" options={TASK_STATUS} />
+          <Sel value={filters.priority} onChange={(v) => setFilters({ ...filters, priority: v })} placeholder="Toda prioridade" options={PRIORITY} />
+          <Sel value={filters.project} onChange={(v) => setFilters({ ...filters, project: v })} placeholder="Todos os projetos" options={projects.map((p) => [p.id, p.name])} />
+          <Sel value={filters.assignee} onChange={(v) => setFilters({ ...filters, assignee: v })} placeholder="Todos responsáveis" options={members.map((m) => [m.id, m.name || ""])} />
+        </div>
+      )}
 
       <div className="card divide-y" style={{ borderColor: "var(--line)" }}>
         {list.length === 0 && <Empty>Nenhuma tarefa com esses filtros.</Empty>}
