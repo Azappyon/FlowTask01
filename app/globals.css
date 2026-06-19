@@ -155,3 +155,9 @@ h1, h2, h3 {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes ftfade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes ftpop { from { opacity: 0; transform: translateY(10px) scale(0.98) } to { opacity: 1; transform: none } }
+.ft-fade { animation: ftfade 0.22s ease both; }
+.ft-pop { animation: ftpop 0.2s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.ft-backdrop { animation: ftfade 0.16s ease both; }

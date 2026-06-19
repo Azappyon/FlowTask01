@@ -101,11 +101,11 @@ export function Modal({
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 py-10"
+      className="ft-backdrop fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 py-10"
       onClick={onClose}
     >
       <div
-        className="card w-full max-w-xl"
+        className="ft-pop card w-full max-w-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: "var(--line)" }}>
