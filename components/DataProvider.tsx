@@ -244,7 +244,11 @@ export function DataProvider({
     toast("Dados de exemplo removidos");
   }
   async function seedDemo() {
-    await supabase.rpc("seed_demo");
+    const { error } = await supabase.rpc("seed_demo");
+    if (error) {
+      toast("Rode a migração 'migration_demo.sql' no Supabase primeiro.");
+      return;
+    }
     await reload();
     toast("Dados de exemplo carregados ✓");
   }
