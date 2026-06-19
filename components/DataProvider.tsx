@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { todayISO } from "@/lib/format";
 import type {
   Profile,
   Project,
@@ -34,7 +33,6 @@ interface DataState {
   loading: boolean;
   reload: () => Promise<void>;
   toast: (msg: string) => void;
-  // mutations
   saveTask: (patch: Partial<Task>, id?: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   toggleTaskDone: (t: Task) => Promise<void>;
@@ -118,88 +116,115 @@ export function DataProvider({
     (toast as any)._t = window.setTimeout(() => setToastMsg(null), 2400);
   }, []);
 
-  // ---- mutations -----------------------------------------------------
+  const upsertLocal = <T extends { id: string }>(
+    setter: React.Dispatch<React.SetStateAction<T[]>>,
+    row: T
+  ) => setter((prev) => (prev.some((x) => x.id === row.id) ? prev.map((x) => (x.id === row.id ? row : x)) : [...prev, row]));
+
+  // ---- mutations: persistem e atualizam o estado local (sem recarregar tudo)
   async function saveTask(patch: Partial<Task>, id?: string) {
     if (id) {
-      await supabase.from("tasks").update(patch).eq("id", id);
+      const { data } = await supabase.from("tasks").update(patch).eq("id", id).select().single();
+      if (data) upsertLocal(setTasks, data as Task);
+      toast("Tarefa atualizada");
     } else {
-      await supabase.from("tasks").insert({ ...patch, company_id });
+      const { data } = await supabase.from("tasks").insert({ ...patch, company_id }).select().single();
+      if (data) setTasks((p) => [...p, data as Task]);
+      toast("Tarefa criada");
     }
-    await reload();
-    toast(id ? "Tarefa atualizada" : "Tarefa criada");
   }
   async function deleteTask(id: string) {
     await supabase.from("tasks").delete().eq("id", id);
-    await reload();
+    setTasks((p) => p.filter((t) => t.id !== id));
+    setChecklist((p) => p.filter((c) => c.task_id !== id));
+    setDeps((p) => p.filter((d) => d.task_id !== id && d.depends_on_id !== id));
     toast("Tarefa excluída");
   }
   async function toggleTaskDone(t: Task) {
     const next = t.status === "concluido" ? "a_fazer" : "concluido";
-    await supabase.from("tasks").update({ status: next }).eq("id", t.id);
-    await reload();
+    const { data } = await supabase.from("tasks").update({ status: next }).eq("id", t.id).select().single();
+    if (data) upsertLocal(setTasks, data as Task);
   }
   async function saveProject(patch: Partial<Project>, id?: string) {
-    if (id) await supabase.from("projects").update(patch).eq("id", id);
-    else await supabase.from("projects").insert({ ...patch, company_id });
-    await reload();
-    toast(id ? "Projeto atualizado" : "Projeto criado");
+    if (id) {
+      const { data } = await supabase.from("projects").update(patch).eq("id", id).select().single();
+      if (data) upsertLocal(setProjects, data as Project);
+      toast("Projeto atualizado");
+    } else {
+      const { data } = await supabase.from("projects").insert({ ...patch, company_id }).select().single();
+      if (data) setProjects((p) => [...p, data as Project]);
+      toast("Projeto criado");
+    }
   }
   async function deleteProject(id: string) {
     await supabase.from("projects").delete().eq("id", id);
-    await reload();
+    setProjects((p) => p.filter((x) => x.id !== id));
     toast("Projeto excluído");
   }
   async function saveLine(patch: Partial<EditorialLine>, id?: string) {
-    if (id) await supabase.from("editorial_lines").update(patch).eq("id", id);
-    else await supabase.from("editorial_lines").insert({ ...patch, company_id });
-    await reload();
-    toast(id ? "Linha atualizada" : "Linha criada");
+    if (id) {
+      const { data } = await supabase.from("editorial_lines").update(patch).eq("id", id).select().single();
+      if (data) upsertLocal(setLines, data as EditorialLine);
+      toast("Linha atualizada");
+    } else {
+      const { data } = await supabase.from("editorial_lines").insert({ ...patch, company_id }).select().single();
+      if (data) setLines((p) => [...p, data as EditorialLine]);
+      toast("Linha criada");
+    }
   }
   async function deleteLine(id: string) {
     await supabase.from("editorial_lines").delete().eq("id", id);
-    await reload();
+    setLines((p) => p.filter((x) => x.id !== id));
     toast("Linha excluída");
   }
   async function saveContent(patch: Partial<Content>, id?: string) {
-    if (id) await supabase.from("contents").update(patch).eq("id", id);
-    else await supabase.from("contents").insert({ ...patch, company_id });
-    await reload();
-    toast(id ? "Conteúdo atualizado" : "Conteúdo criado");
+    if (id) {
+      const { data } = await supabase.from("contents").update(patch).eq("id", id).select().single();
+      if (data) upsertLocal(setContents, data as Content);
+      toast("Conteúdo atualizado");
+    } else {
+      const { data } = await supabase.from("contents").insert({ ...patch, company_id }).select().single();
+      if (data) setContents((p) => [...p, data as Content]);
+      toast("Conteúdo criado");
+    }
   }
   async function deleteContent(id: string) {
     await supabase.from("contents").delete().eq("id", id);
-    await reload();
+    setContents((p) => p.filter((x) => x.id !== id));
     toast("Conteúdo excluído");
   }
   async function addChecklist(taskId: string, label: string) {
     const pos = checklist.filter((c) => c.task_id === taskId).length;
-    await supabase.from("task_checklist_items").insert({ company_id, task_id: taskId, label, position: pos });
-    await reload();
+    const { data } = await supabase.from("task_checklist_items").insert({ company_id, task_id: taskId, label, position: pos }).select().single();
+    if (data) setChecklist((p) => [...p, data as ChecklistItem]);
   }
   async function toggleChecklist(item: ChecklistItem) {
-    await supabase.from("task_checklist_items").update({ is_done: !item.is_done }).eq("id", item.id);
-    await reload();
+    const { data } = await supabase.from("task_checklist_items").update({ is_done: !item.is_done }).eq("id", item.id).select().single();
+    if (data) upsertLocal(setChecklist, data as ChecklistItem);
   }
   async function deleteChecklist(id: string) {
     await supabase.from("task_checklist_items").delete().eq("id", id);
-    await reload();
+    setChecklist((p) => p.filter((c) => c.id !== id));
   }
   async function addDep(taskId: string, dependsOn: string) {
     if (taskId === dependsOn) return;
-    await supabase.from("task_dependencies").insert({ company_id, task_id: taskId, depends_on_id: dependsOn });
-    await reload();
+    const { data } = await supabase.from("task_dependencies").insert({ company_id, task_id: taskId, depends_on_id: dependsOn }).select().single();
+    if (data) setDeps((p) => [...p, data as TaskDependency]);
   }
   async function removeDep(taskId: string, dependsOn: string) {
     await supabase.from("task_dependencies").delete().eq("task_id", taskId).eq("depends_on_id", dependsOn);
-    await reload();
+    setDeps((p) => p.filter((d) => !(d.task_id === taskId && d.depends_on_id === dependsOn)));
   }
   async function addComment(entity_type: Comment["entity_type"], entity_id: string, body: string) {
-    await supabase.from("comments").insert({ company_id, entity_type, entity_id, author_id: profile.id, body });
-    await reload();
+    const { data } = await supabase.from("comments").insert({ company_id, entity_type, entity_id, author_id: profile.id, body }).select().single();
+    if (data) setComments((p) => [...p, data as Comment]);
   }
   async function updateProfile(patch: Partial<Profile>) {
-    await supabase.from("profiles").update(patch).eq("id", profile.id);
-    await reload();
+    const { data } = await supabase.from("profiles").update(patch).eq("id", profile.id).select().single();
+    if (data) {
+      setProfile(data as Profile);
+      upsertLocal(setMembers, data as Profile);
+    }
     toast("Perfil atualizado");
   }
 
@@ -228,5 +253,3 @@ export function DataProvider({
     </Ctx.Provider>
   );
 }
-
-export { todayISO };

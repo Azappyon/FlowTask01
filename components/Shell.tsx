@@ -29,8 +29,26 @@ function Icon({ d }: { d: string }) {
   );
 }
 
+function LoadingSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="mb-5 h-8 w-48 rounded-lg" style={{ background: "var(--line)" }} />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-24 rounded-xl" style={{ background: "var(--line)" }} />
+        ))}
+      </div>
+      <div className="mt-5 space-y-2">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-12 rounded-lg" style={{ background: "var(--line)" }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function Shell({ children }: { children: React.ReactNode }) {
-  const { profile, tasks } = useData();
+  const { profile, tasks, loading } = useData();
   const pathname = usePathname();
   const [navOpen, setNavOpen] = useState(false);
 
@@ -117,7 +135,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </form>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8">
+          {loading ? <LoadingSkeleton /> : children}
+        </main>
       </div>
     </div>
   );
