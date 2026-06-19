@@ -100,7 +100,7 @@ h1, h2, h3 {
   .card {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: 16px;
     box-shadow: var(--shadow-sm);
     transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
   }
@@ -118,7 +118,7 @@ h1, h2, h3 {
   .input,
   .select,
   .textarea {
-    @apply w-full rounded-[9px] px-3 py-2 text-sm outline-none;
+    @apply w-full rounded-[10px] px-3 py-2.5 text-sm outline-none;
     background: var(--surface);
     border: 1px solid var(--line);
     color: var(--ink);

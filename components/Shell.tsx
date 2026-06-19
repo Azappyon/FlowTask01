@@ -23,9 +23,7 @@ const NAV: [string, string, string][] = [
 function Icon({ d, size = 18 }: { d: string; size?: number }) {
   return (
     <svg viewBox="0 0 24 24" style={{ width: size, height: size }} className="flex-none" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {d.split("M").filter(Boolean).map((p, i) => (
-        <path key={i} d={"M" + p} />
-      ))}
+      {d.split("M").filter(Boolean).map((p, i) => (<path key={i} d={"M" + p} />))}
     </svg>
   );
 }
@@ -43,6 +41,8 @@ function LoadingSkeleton() {
     </div>
   );
 }
+
+const LOGOUT_D = "M16 17l5-5-5-5M21 12H9M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4";
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const { profile, tasks, loading, saveTask } = useData();
@@ -71,12 +71,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
     ? [...NAV, ["/admin", "Admin", "M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"]]
     : NAV;
   const current = navItems.find(([href]) => href === pathname)?.[1] ?? "";
+  const expanded = !collapsed || navOpen;
 
   function toggleTheme() {
     const dark = document.documentElement.classList.toggle("dark");
     try { localStorage.setItem("flowtask_theme", dark ? "dark" : "light"); } catch {}
   }
-
   async function quickCreate() {
     if (!qtitle.trim()) return;
     await saveTask({ title: qtitle.trim(), status: "a_fazer", priority: "media" });
@@ -84,37 +84,33 @@ export function Shell({ children }: { children: React.ReactNode }) {
     setQuickOpen(false);
   }
 
-  const railW = collapsed ? "76px" : "248px";
-
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
       <aside
         className={`fixed z-40 flex h-full flex-col border-r transition-all duration-200 md:static md:translate-x-0 ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
-        style={{ width: navOpen ? "248px" : railW, background: "var(--surface)", borderColor: "var(--line)" }}
+        style={{ width: navOpen ? "248px" : collapsed ? "76px" : "248px", background: "var(--surface)", borderColor: "var(--line)" }}
       >
-        <div className={`flex items-center gap-2.5 px-4 py-4 ${collapsed && !navOpen ? "justify-center px-0" : ""}`}>
+        <div className={`flex items-center gap-2.5 px-4 py-4 ${expanded ? "" : "justify-center px-0"}`}>
           <div className="flex h-9 w-9 flex-none items-center justify-center rounded-xl text-base font-black text-white" style={{ background: "linear-gradient(135deg,var(--accent),var(--accent-2))" }}>F</div>
-          {(!collapsed || navOpen) && <span className="text-lg font-extrabold tracking-tight">Flowtask</span>}
+          {expanded && <span className="text-lg font-extrabold tracking-tight">Flowtask</span>}
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-2">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2 scrollbar-thin">
           {navItems.map(([href, label, d]) => {
             const active = pathname === href;
-            const showLabel = !collapsed || navOpen;
             return (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setNavOpen(false)}
                 title={label}
-                className={`relative flex items-center rounded-xl py-2.5 text-sm font-medium transition ${showLabel ? "gap-3 px-3" : "justify-center px-0"}`}
+                className={`relative flex items-center rounded-xl py-2.5 text-sm font-medium transition ${expanded ? "gap-3 px-3" : "justify-center px-0"}`}
                 style={active ? { background: "var(--accent-soft)", color: "var(--accent-strong)", fontWeight: 600 } : { color: "var(--muted)" }}
               >
                 {active && <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r" style={{ background: "var(--accent)" }} />}
                 <Icon d={d} />
-                {showLabel && <span className="flex-1">{label}</span>}
-                {showLabel && href === "/tarefas" && overdue > 0 && (
+                {expanded && <span className="flex-1">{label}</span>}
+                {expanded && href === "/tarefas" && overdue > 0 && (
                   <span className="rounded-full px-1.5 text-[11px] font-bold text-white" style={{ background: "var(--red)" }}>{overdue}</span>
                 )}
               </Link>
@@ -122,40 +118,42 @@ export function Shell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* user + collapse toggle */}
         <div className="border-t px-3 py-3" style={{ borderColor: "var(--line)" }}>
-          <div className={`flex items-center gap-2.5 ${collapsed && !navOpen ? "justify-center" : "px-1"}`}>
-            <Avatar member={profile} size={30} />
-            {(!collapsed || navOpen) && (
+          <div className={`flex items-center gap-2.5 ${expanded ? "px-1" : "justify-center"}`}>
+            <Avatar member={profile} size={32} />
+            {expanded && (
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold">{profile.name}</div>
                 <div className="truncate text-xs" style={{ color: "var(--faint)" }}>{profile.email}</div>
               </div>
             )}
           </div>
-          <button
-            onClick={toggleCollapsed}
-            className="mt-3 hidden w-full items-center justify-center rounded-lg border py-1.5 text-xs font-medium transition hover:bg-[var(--accent-soft)] md:flex"
-            style={{ borderColor: "var(--line)", color: "var(--muted)" }}
-            title={collapsed ? "Expandir menu" : "Recolher menu"}
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ transform: collapsed ? "rotate(180deg)" : "none" }}>
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-            {!collapsed && <span className="ml-1.5">Recolher</span>}
-          </button>
+          <div className={`mt-3 flex gap-2 ${expanded ? "" : "flex-col items-center"}`}>
+            <form action="/auth/signout" method="post" className={expanded ? "flex-1" : ""}>
+              <button type="submit" title="Sair" className="btn btn-ghost w-full px-2 py-1.5 text-xs">
+                <Icon d={LOGOUT_D} size={15} />
+                {expanded && <span>Sair</span>}
+              </button>
+            </form>
+            <button
+              onClick={toggleCollapsed}
+              className="btn btn-ghost px-2 py-1.5 text-xs"
+              title={collapsed ? "Expandir menu" : "Recolher menu"}
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ transform: collapsed ? "rotate(180deg)" : "none" }}><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
+          </div>
         </div>
       </aside>
 
       {navOpen && <div className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={() => setNavOpen(false)} />}
 
-      {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex items-center gap-3 border-b px-4 py-3 md:px-6" style={{ background: "color-mix(in srgb, var(--surface) 88%, transparent)", borderColor: "var(--line)", backdropFilter: "blur(8px)" }}>
           <button className="btn btn-ghost px-2 py-1.5 md:hidden" onClick={() => setNavOpen(true)} aria-label="Abrir menu">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
           </button>
-          {current && <div className="hidden text-sm font-semibold sm:block" style={{ color: "var(--muted)" }}>{current}</div>}
+          {current && <div className="text-sm font-semibold" style={{ color: "var(--ink)" }}>{current}</div>}
           <div className="flex-1" />
           <button className="btn btn-primary px-3 py-1.5 text-sm" onClick={() => { setQtitle(""); setQuickOpen(true); }}>
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
@@ -164,9 +162,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <button className="btn btn-ghost px-2 py-1.5" onClick={toggleTheme} aria-label="Alternar tema" title="Alternar tema">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
           </button>
-          <form action="/auth/signout" method="post">
-            <button className="btn btn-ghost px-3 py-1.5 text-sm" type="submit">Sair</button>
-          </form>
         </header>
 
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8">
@@ -187,17 +182,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
         }
       >
         <label className="field-label">Título</label>
-        <input
-          autoFocus
-          className="input"
-          placeholder="O que precisa ser feito?"
-          value={qtitle}
-          onChange={(e) => setQtitle(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") quickCreate(); }}
-        />
-        <p className="mt-2 text-xs" style={{ color: "var(--faint)" }}>
-          Criada como “Para fazer”. Você ajusta projeto, prazo e prioridade depois, em Tarefas.
-        </p>
+        <input autoFocus className="input" placeholder="O que precisa ser feito?" value={qtitle} onChange={(e) => setQtitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") quickCreate(); }} />
+        <p className="mt-2 text-xs" style={{ color: "var(--faint)" }}>Criada como “Para fazer”. Ajuste projeto, prazo e prioridade depois, em Tarefas.</p>
       </Modal>
     </div>
   );
