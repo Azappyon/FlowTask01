@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useData } from "./DataProvider";
 import { Avatar } from "./ui";
+import { DemoBanner } from "./DemoBanner";
 import { daysFrom } from "@/lib/format";
 
 const NAV: [string, string, string][] = [
@@ -136,6 +137,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </header>
 
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8">
+          {!loading && <DemoBanner />}
           {loading ? <LoadingSkeleton /> : children}
         </main>
       </div>

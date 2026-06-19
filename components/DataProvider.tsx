@@ -49,6 +49,9 @@ interface DataState {
   removeDep: (taskId: string, dependsOn: string) => Promise<void>;
   addComment: (entityType: Comment["entity_type"], entityId: string, body: string) => Promise<void>;
   updateProfile: (patch: Partial<Profile>) => Promise<void>;
+  hasDemo: boolean;
+  clearDemo: () => Promise<void>;
+  seedDemo: () => Promise<void>;
 }
 
 const Ctx = createContext<DataState | null>(null);
@@ -80,6 +83,9 @@ export function DataProvider({
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   const company_id = profile.company_id;
+  const hasDemo =
+    projects.some((x) => x.is_demo) || tasks.some((x) => x.is_demo) ||
+    lines.some((x) => x.is_demo) || contents.some((x) => x.is_demo);
 
   const reload = useCallback(async () => {
     const cid = profile.company_id;
@@ -228,6 +234,21 @@ export function DataProvider({
     toast("Perfil atualizado");
   }
 
+  async function clearDemo() {
+    const cid = company_id;
+    await supabase.from("contents").delete().eq("company_id", cid).eq("is_demo", true);
+    await supabase.from("tasks").delete().eq("company_id", cid).eq("is_demo", true);
+    await supabase.from("editorial_lines").delete().eq("company_id", cid).eq("is_demo", true);
+    await supabase.from("projects").delete().eq("company_id", cid).eq("is_demo", true);
+    await reload();
+    toast("Dados de exemplo removidos");
+  }
+  async function seedDemo() {
+    await supabase.rpc("seed_demo");
+    await reload();
+    toast("Dados de exemplo carregados ✓");
+  }
+
   const value: DataState = {
     profile, members, projects, tasks, lines, contents, checklist, deps, comments, loading,
     reload, toast,
@@ -237,6 +258,7 @@ export function DataProvider({
     saveContent, deleteContent,
     addChecklist, toggleChecklist, deleteChecklist,
     addDep, removeDep, addComment, updateProfile,
+    hasDemo, clearDemo, seedDemo,
   };
 
   return (

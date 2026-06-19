@@ -49,6 +49,7 @@ export interface Profile {
 }
 
 export interface Project {
+  is_demo?: boolean;
   id: string;
   company_id: string;
   name: string;
@@ -63,6 +64,7 @@ export interface Project {
 }
 
 export interface Task {
+  is_demo?: boolean;
   id: string;
   company_id: string;
   title: string;
@@ -104,6 +106,7 @@ export interface Comment {
 }
 
 export interface EditorialLine {
+  is_demo?: boolean;
   id: string;
   company_id: string;
   name: string;
@@ -121,6 +124,7 @@ export interface EditorialLine {
 }
 
 export interface Content {
+  is_demo?: boolean;
   id: string;
   company_id: string;
   title: string;
