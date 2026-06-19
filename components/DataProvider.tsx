@@ -52,6 +52,10 @@ interface DataState {
   hasDemo: boolean;
   clearDemo: () => Promise<void>;
   seedDemo: () => Promise<void>;
+  createOpen: boolean;
+  createKind: string | null;
+  openCreate: (kind?: string | null) => void;
+  closeCreate: () => void;
 }
 
 const Ctx = createContext<DataState | null>(null);
@@ -81,6 +85,8 @@ export function DataProvider({
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createKind, setCreateKind] = useState<string | null>(null);
 
   const company_id = profile.company_id;
   const hasDemo =
@@ -253,6 +259,9 @@ export function DataProvider({
     toast("Dados de exemplo carregados ✓");
   }
 
+  function openCreate(kind: string | null = null) { setCreateKind(kind); setCreateOpen(true); }
+  function closeCreate() { setCreateOpen(false); }
+
   const value: DataState = {
     profile, members, projects, tasks, lines, contents, checklist, deps, comments, loading,
     reload, toast,
@@ -263,6 +272,7 @@ export function DataProvider({
     addChecklist, toggleChecklist, deleteChecklist,
     addDep, removeDep, addComment, updateProfile,
     hasDemo, clearDemo, seedDemo,
+    createOpen, createKind, openCreate, closeCreate,
   };
 
   return (

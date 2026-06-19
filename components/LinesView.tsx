@@ -8,7 +8,7 @@ import { LINE_COLORS } from "@/lib/constants";
 import type { EditorialLine } from "@/lib/types";
 
 export function LinesView() {
-  const { lines, contents, members } = useData();
+  const { lines, contents, members, openCreate } = useData();
   const [editing, setEditing] = useState<EditorialLine | null | undefined>(undefined);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = openId ? lines.find((l) => l.id === openId) : null;
@@ -18,7 +18,7 @@ export function LinesView() {
       <PageHead
         title="Linhas editoriais"
         subtitle="Estratégias que orientam toda a produção de conteúdo"
-        action={<button className="btn btn-primary" onClick={() => setEditing(null)}><PlusIcon /> Nova linha</button>}
+        action={<button className="btn btn-primary" onClick={() => openCreate("linha")}><PlusIcon /> Nova linha</button>}
       />
       {lines.length === 0 ? (
         <div className="card"><Empty>Nenhuma linha editorial ainda.</Empty></div>

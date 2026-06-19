@@ -11,7 +11,7 @@ import type { Project, Task } from "@/lib/types";
 const isDone = (t: Task) => ["concluido", "aprovado"].includes(t.status);
 
 export function ProjectsView() {
-  const { projects, tasks, members } = useData();
+  const { projects, tasks, members, openCreate } = useData();
   const [editing, setEditing] = useState<Project | null | undefined>(undefined);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = openId ? projects.find((p) => p.id === openId) : null;
@@ -21,7 +21,7 @@ export function ProjectsView() {
       <PageHead
         title="Projetos"
         subtitle={`${projects.length} projetos`}
-        action={<button className="btn btn-primary" onClick={() => setEditing(null)}><PlusIcon /> Novo projeto</button>}
+        action={<button className="btn btn-primary" onClick={() => openCreate("projeto")}><PlusIcon /> Novo projeto</button>}
       />
       {projects.length === 0 ? (
         <div className="card"><Empty>Nenhum projeto ainda.</Empty></div>

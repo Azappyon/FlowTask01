@@ -46,11 +46,10 @@ function LoadingSkeleton() {
 const LOGOUT_D = "M16 17l5-5-5-5M21 12H9M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4";
 
 export function Shell({ children }: { children: React.ReactNode }) {
-  const { profile, tasks, loading } = useData();
+  const { profile, tasks, loading, createOpen, createKind, openCreate, closeCreate } = useData();
   const pathname = usePathname();
   const [navOpen, setNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
     try { setCollapsed(localStorage.getItem("flowtask_sidebar") === "1"); } catch {}
@@ -149,7 +148,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </button>
           {current && <div className="text-sm font-semibold" style={{ color: "var(--ink)" }}>{current}</div>}
           <div className="flex-1" />
-          <button className="btn btn-primary px-3 py-1.5 text-sm" onClick={() => setCreateOpen(true)}>
+          <button className="btn btn-primary px-3 py-1.5 text-sm" onClick={() => openCreate()}>
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
             <span className="hidden sm:inline">Criar</span>
           </button>
@@ -164,7 +163,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      <CreateWizard open={createOpen} onClose={() => setCreateOpen(false)} />
+      <CreateWizard open={createOpen} initialKind={createKind} onClose={closeCreate} />
     </div>
   );
 }

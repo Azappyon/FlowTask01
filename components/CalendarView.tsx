@@ -28,7 +28,7 @@ function upcomingSeasons() {
 }
 
 export function CalendarView() {
-  const { contents, lines, saveContent } = useData();
+  const { contents, lines, saveContent, openCreate } = useData();
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth());
   const [year, setYear] = useState(now.getFullYear());
@@ -111,7 +111,7 @@ export function CalendarView() {
         <span className="min-w-[150px] text-center font-bold capitalize">{monthName}</span>
         <button className="btn btn-ghost px-2 py-1.5" onClick={() => nav(1)} aria-label="Próximo mês">›</button>
         <button className="btn btn-ghost" onClick={() => { setMonth(now.getMonth()); setYear(now.getFullYear()); }}>Hoje</button>
-        <button className="btn btn-primary ml-auto" onClick={() => setEditing({ content: null })}><PlusIcon /> Novo conteúdo</button>
+        <button className="btn btn-primary ml-auto" onClick={() => openCreate("conteudo")}><PlusIcon /> Novo conteúdo</button>
       </div>
 
       <div className="card overflow-hidden">

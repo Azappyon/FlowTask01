@@ -21,7 +21,7 @@ export function dueLabel(t: Task) {
 }
 
 export function TasksView() {
-  const { tasks, projects, members, deps, toggleTaskDone } = useData();
+  const { tasks, projects, members, deps, toggleTaskDone, openCreate } = useData();
   const [editing, setEditing] = useState<Task | null | undefined>(undefined); // undefined=closed
   const [openId, setOpenId] = useState<string | null>(null);
   const [filters, setFilters] = useState({ status: "", priority: "", project: "", assignee: "", sort: "prazo" });
@@ -56,7 +56,7 @@ export function TasksView() {
         title="Tarefas"
         subtitle={`${tasks.length} tarefas no total`}
         action={
-          <button className="btn btn-primary" onClick={() => setEditing(null)}>
+          <button className="btn btn-primary" onClick={() => openCreate("tarefa")}>
             <PlusIcon /> Nova tarefa
           </button>
         }

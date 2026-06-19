@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useData } from "./DataProvider";
 import { TASK_STATUS, PRIORITY, CONTENT_STATUS, PROJECT_STATUS, FORMATS, LINE_COLORS, label } from "@/lib/constants";
 import { todayISO } from "@/lib/format";
@@ -15,7 +15,7 @@ const KINDS: { k: Kind; title: string; desc: string; icon: string }[] = [
   { k: "linha", title: "Linha editorial", desc: "Estratégia de conteúdo", icon: "M4 6h16M4 12h10M4 18h7" },
 ];
 
-export function CreateWizard({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CreateWizard({ open, onClose, initialKind }: { open: boolean; onClose: () => void; initialKind?: string | null }) {
   const data = useData();
   const { members, projects, lines } = data;
   const [kind, setKind] = useState<Kind | null>(null);
@@ -24,6 +24,13 @@ export function CreateWizard({ open, onClose }: { open: boolean; onClose: () => 
   const [f, setF] = useState<Record<string, any>>({});
 
   const up = (patch: Record<string, any>) => setF((p) => ({ ...p, ...patch }));
+
+  useEffect(() => {
+    if (!open) return;
+    if (initialKind) start(initialKind as Kind);
+    else reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initialKind]);
 
   function reset() {
     setKind(null); setStep(0); setBusy(false); setF({});
