@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f4f3ef;
+  --surface: #ffffff;
+  --ink: #21241f;
+  --muted: #6b6f68;
+  --faint: #9b9f97;
+  --line: #e6e4dd;
+  --accent: #4f6f52;
+  --accent-2: #6b8c6e;
+  --accent-soft: #e9eee8;
+  --accent-strong: #3f5942;
+  --green: #3f7a4f;
+  --amber: #b5793a;
+  --red: #c0524a;
+  --blue: #3f6090;
+  --violet: #7c3aed;
+}
+
+.dark {
+  --bg: #181a17;
+  --surface: #21231f;
+  --ink: #e7e8e2;
+  --muted: #a0a39a;
+  --faint: #71746b;
+  --line: #2e312b;
+  --accent: #83a786;
+  --accent-2: #9bbf9e;
+  --accent-soft: #262b25;
+  --accent-strong: #a6c9a9;
+  --green: #6ab07a;
+  --amber: #d49a5e;
+  --red: #d97a72;
+  --blue: #7ea0c8;
+  --violet: #a78bfa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-3.5 py-2 text-sm font-semibold transition cursor-pointer select-none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--accent-strong);
+  }
+  .btn-ghost {
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent-2);
+  }
+  .btn-danger {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid var(--line);
+  }
+  .btn-danger:hover {
+    background: color-mix(in srgb, var(--red) 12%, transparent);
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(20, 30, 20, 0.04);
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold whitespace-nowrap;
+  }
+  .input,
+  .select,
+  .textarea {
+    @apply w-full rounded-[9px] px-3 py-2 text-sm outline-none;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .input:focus,
+  .select:focus,
+  .textarea:focus {
+    border-color: var(--accent-2);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .field-label {
+    @apply mb-1 block text-[11px] font-semibold uppercase tracking-wide;
+    color: var(--muted);
+  }
+  .sec-title {
+    @apply mb-2 mt-5 text-sm font-bold;
+    color: var(--ink);
+  }
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 8px;
+}
